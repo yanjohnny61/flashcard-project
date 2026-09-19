@@ -133,6 +133,12 @@ button:disabled {
   font-variant-numeric: tabular-nums;
 }
 
+.delete-btn {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+}
+
 /* Custom card form */
 .add-card {
   margin-top: 32px;

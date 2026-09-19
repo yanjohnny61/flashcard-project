@@ -7,17 +7,19 @@ const cardEl = document.querySelector("#card");
 const cardLabelEl = document.querySelector("#cardLabel");
 const cardTextEl = document.querySelector("#cardText");
 const progressEl = document.querySelector("#progress");
+
 const prevBtn = document.querySelector("#prevBtn");
 const nextBtn = document.querySelector("#nextBtn");
+const deleteBtn = document.querySelector("#deleteBtn");
 
 const addCardForm = document.querySelector("#addCardForm");
 const termInput = document.querySelector("#termInput");
 const definitionInput = document.querySelector("#definitionInput");
 
-/* Saves custom cards in localStorage under STORAGE_KEY */
+// Saves custom cards in localStorage under STORAGE_KEY
 const STORAGE_KEY = "customFlashcards";
  
-function loadCustomCards() {
+function loadFlashcards() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return []; // nothing saved yet
  
@@ -29,20 +31,30 @@ function loadCustomCards() {
   }
 }
  
-function saveCustomCards(cards) {
+function saveFlashcards(cards) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
 }
  
-// Loads user's own cards on startup
-let customCards = loadCustomCards();
- 
-/* Adds custom cards to hardcoded cards */
-let allFlashcards = flashcards.concat(customCards);
+// Loads flashcards on start
+let flashcards = loadFlashcards();
 
 /* render() is responsible for making the page match
   the current state. Called whenever state changes */
 function render() {
-  const card = allFlashcards[currentIndex];
+
+  // Handles empty deck
+  if (flashcards.length === 0) {
+    cardLabelEl.textContent = "EMPTY";
+    cardTextEl.textContent = "No cards yet — add one below.";
+    cardEl.classList.remove("is-definition");
+    progressEl.textContent = "0 cards";
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+    deleteBtn.disabled = true;
+    return;
+  }
+
+  const card = flashcards[currentIndex];
 
   if (showingDefinition) {
     cardLabelEl.textContent = "DEFINITION";
@@ -54,11 +66,13 @@ function render() {
     cardEl.classList.remove("is-definition");
   }
 
-  progressEl.textContent = `Card ${currentIndex + 1} of ${allFlashcards.length}`;
+  progressEl.textContent = `Card ${currentIndex + 1} of ${flashcards.length}`;
 
   // Disable "Previous" on the first card and "Next" on the last card
   prevBtn.disabled = currentIndex === 0;
-  nextBtn.disabled = currentIndex === allFlashcards.length - 1;
+  nextBtn.disabled = currentIndex === flashcards.length - 1;
+
+  deleteBtn.disabled = false;
 }
 
 // Clicking the card flips between term and definition
@@ -69,7 +83,7 @@ function flipCard() {
 
 // "Next" moves forward one card and resets to showing the term
 function goNext() {
-  if (currentIndex < allFlashcards.length - 1) {
+  if (currentIndex < flashcards.length - 1) {
     currentIndex = currentIndex + 1;
     showingDefinition = false;
     render();
@@ -85,19 +99,34 @@ function goPrev() {
   }
 }
 
+// Handles deleting cards
+function deleteCurrentCard() {
+  if (flashcards.length === 0) return; // nothing to delete
+
+  // Confirm deletion
+  const card = flashcards[currentIndex];
+  const confirmed = confirm(`Delete "${card.term}"?`);
+  if (!confirmed) return;
+
+  flashcards.splice(currentIndex, 1);
+  saveFlashcards(flashcards);
+ 
+  // Shifts index down upon deleting card
+  if (currentIndex >= flashcards.length) {
+    currentIndex = flashcards.length - 1;
+  }
+ 
+  showingDefinition = false;
+  render();
+}
+
 // Event listeners connect user actions to state changes 
 cardEl.addEventListener("click", flipCard);
 nextBtn.addEventListener("click", goNext);
 prevBtn.addEventListener("click", goPrev);
+deleteBtn.addEventListener("click", deleteCurrentCard);
 
-/* ============================================================
-   NEW: handling the "add a custom card" form submission
- 
-   Forms fire a "submit" event when the button is clicked OR
-   when Enter is pressed inside one of their inputs — using
-   the form's submit event (rather than a click listener on
-   just the button) gives us both for free.
-   ============================================================ */
+// Handles form for adding cards 
 addCardForm.addEventListener("submit", function (event) {
   event.preventDefault(); // stops browser default reload
  
@@ -109,16 +138,15 @@ addCardForm.addEventListener("submit", function (event) {
  
   const newCard = { term: term, definition: definition };
  
-  customCards.push(newCard);       // add to the custom list
-  saveCustomCards(customCards);    // persist that list to localStorage
-  allFlashcards.push(newCard);     // add to the "everything" list the app displays
+  flashcards.push(newCard);    
+  saveFlashcards(flashcards);    
  
   // Clear the form for the next entry
   termInput.value = "";
   definitionInput.value = "";
  
   // Jump straight to the newly added card
-  currentIndex = allFlashcards.length - 1;
+  currentIndex = flashcards.length - 1;
   showingDefinition = false;
   render();
 });

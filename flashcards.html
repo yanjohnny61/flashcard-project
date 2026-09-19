@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>CS Term Flashcards</title>
+<title>Flashcards</title>
  
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,13 +11,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
  
 <link rel="stylesheet" href="styles.css">
-<script src="data.js" defer></script>
 <script src="flashcards.js" defer></script>
 </head>
 <body>
  
 <div class="app">
-  <h1>CS Term Flashcards</h1>
+  <h1>Flashcards</h1>
   <p class="subtitle">Click the card to flip between the term and its definition.</p>
  
   <!-- Card serves as flip button  -->
@@ -35,9 +34,11 @@
     <div class="progress" id="progress"></div>
   </div>
 
+  <button id="deleteBtn" class="delete-btn">Delete This Card</button>
+
   <!-- Form for adding custom flashcards -->
   <div class="add-card">
-    <h2>Add a custom card</h2>
+    <h2>Add a card</h2>
     <form id="addCardForm">
       <input type="text" id="termInput" placeholder="Term" required />
       <input type="text" id="definitionInput" placeholder="Definition" required />
