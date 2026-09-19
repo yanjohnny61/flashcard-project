@@ -32,28 +32,44 @@ function render() {
   nextBtn.disabled = currentIndex === flashcards.length - 1;
 }
 
-// Event listeners connect user actions to state changes 
 // Clicking the card flips between term and definition
-cardEl.addEventListener("click", function () {
+function flipCard() {
   showingDefinition = !showingDefinition;
   render();
-});
+}
 
 // "Next" moves forward one card and resets to showing the term
-nextBtn.addEventListener("click", function () {
+function goNext() {
   if (currentIndex < flashcards.length - 1) {
     currentIndex = currentIndex + 1;
     showingDefinition = false;
     render();
   }
-});
+}
 
 // "Previous" moves back one card and resets to showing the term
-prevBtn.addEventListener("click", function () {
+function goPrev() {
   if (currentIndex > 0) {
     currentIndex = currentIndex - 1;
     showingDefinition = false;
     render();
+  }
+}
+
+// Event listeners connect user actions to state changes 
+cardEl.addEventListener("click", flipCard);
+nextBtn.addEventListener("click", goNext);
+prevBtn.addEventListener("click", goPrev);
+
+// Keyboard support
+document.addEventListener("keydown", function (event) {
+  if (event.key === "ArrowRight") {
+    goNext();
+  } else if (event.key === "ArrowLeft") {
+    goPrev();
+  } else if (event.key === " ") {
+    event.preventDefault();
+    flipCard();
   }
 });
 
