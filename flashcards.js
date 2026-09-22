@@ -12,31 +12,52 @@ const prevBtn = document.querySelector("#prevBtn");
 const nextBtn = document.querySelector("#nextBtn");
 const deleteBtn = document.querySelector("#deleteBtn");
 
+const masterySegments = document.querySelectorAll("#masteryBar .mastery-segment");
+const knowBtn = document.querySelector("#knowBtn");
+const dontKnowBtn = document.querySelector("#dontKnowBtn");
+
 const addCardForm = document.querySelector("#addCardForm");
 const termInput = document.querySelector("#termInput");
 const definitionInput = document.querySelector("#definitionInput");
 
 // Saves custom cards in localStorage under STORAGE_KEY
 const STORAGE_KEY = "customFlashcards";
- 
+
+const MAX_MASTERY = 3;
+
 function loadFlashcards() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return []; // nothing saved yet
- 
+
   try {
-    return JSON.parse(raw);
+    const cards = JSON.parse(raw);
+    // Uses 0 if no mastery available
+    return cards.map(function (card) {
+      return { term: card.term, definition: card.definition, mastery: card.mastery ?? 0 };
+    });
   } catch (e) {
     // Fail safe if data cannot be read
     return [];
   }
 }
- 
+
 function saveFlashcards(cards) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
 }
- 
+
 // Loads flashcards on start
 let flashcards = loadFlashcards();
+
+// Fills in segments based on mastery
+function renderMasteryBar(mastery) {
+  masterySegments.forEach(function (segment, index) {
+    if (index < mastery) {
+      segment.classList.add("filled");
+    } else {
+      segment.classList.remove("filled");
+    }
+  });
+}
 
 /* render() is responsible for making the page match
   the current state. Called whenever state changes */
@@ -51,6 +72,9 @@ function render() {
     prevBtn.disabled = true;
     nextBtn.disabled = true;
     deleteBtn.disabled = true;
+    knowBtn.disabled = true;
+    dontKnowBtn.disabled = true;
+    renderMasteryBar(0); // no card = no filled segments
     return;
   }
 
@@ -73,6 +97,9 @@ function render() {
   nextBtn.disabled = currentIndex === flashcards.length - 1;
 
   deleteBtn.disabled = false;
+  knowBtn.disabled = false;
+  dontKnowBtn.disabled = false;
+  renderMasteryBar(card.mastery); // draw card's mastery level
 }
 
 // Clicking the card flips between term and definition
@@ -99,6 +126,22 @@ function goPrev() {
   }
 }
 
+// Raises mastery by one
+function markKnow() {
+  const card = flashcards[currentIndex];
+  card.mastery = Math.min(card.mastery + 1, MAX_MASTERY); // math.min prevents > 3
+  saveFlashcards(flashcards);
+  render();
+}
+
+// Lowers mastery by one 
+function markDontKnow() {
+  const card = flashcards[currentIndex];
+  card.mastery = Math.max(card.mastery - 1, 0); // math.max prevents < 0
+  saveFlashcards(flashcards);
+  render();
+}
+
 // Handles deleting cards
 function deleteCurrentCard() {
   if (flashcards.length === 0) return; // nothing to delete
@@ -110,12 +153,12 @@ function deleteCurrentCard() {
 
   flashcards.splice(currentIndex, 1);
   saveFlashcards(flashcards);
- 
+
   // Shifts index down upon deleting card
   if (currentIndex >= flashcards.length) {
     currentIndex = flashcards.length - 1;
   }
- 
+
   showingDefinition = false;
   render();
 }
@@ -125,26 +168,28 @@ cardEl.addEventListener("click", flipCard);
 nextBtn.addEventListener("click", goNext);
 prevBtn.addEventListener("click", goPrev);
 deleteBtn.addEventListener("click", deleteCurrentCard);
+knowBtn.addEventListener("click", markKnow);
+dontKnowBtn.addEventListener("click", markDontKnow);
 
 // Handles form for adding cards 
 addCardForm.addEventListener("submit", function (event) {
   event.preventDefault(); // stops browser default reload
- 
+
   const term = termInput.value.trim();
   const definition = definitionInput.value.trim();
- 
+
   // Don't add a blank card if either field is empty
   if (term === "" || definition === "") return;
- 
-  const newCard = { term: term, definition: definition };
- 
-  flashcards.push(newCard);    
-  saveFlashcards(flashcards);    
- 
+
+  const newCard = { term: term, definition: definition, mastery: 0 };
+
+  flashcards.push(newCard);
+  saveFlashcards(flashcards);
+
   // Clear the form for the next entry
   termInput.value = "";
   definitionInput.value = "";
- 
+
   // Jump straight to the newly added card
   currentIndex = flashcards.length - 1;
   showingDefinition = false;

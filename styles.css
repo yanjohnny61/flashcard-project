@@ -81,6 +81,37 @@ h1 {
   font-weight: 400;
 }
 
+/* Mastery bar */
+.mastery-bar {
+  display: flex;
+  gap: 6px;
+  margin-top: 20px;
+}
+ 
+.mastery-segment {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+}
+ 
+.mastery-segment.filled {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+ 
+/* Know / Don't Know buttons */
+.mastery-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+ 
+.mastery-controls button {
+  flex: 1;
+}
+
 .hint {
   font-size: 13px;
   color: var(--color-text-muted);
