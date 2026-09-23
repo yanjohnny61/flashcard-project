@@ -11,6 +11,7 @@ const progressEl = document.querySelector("#progress");
 const prevBtn = document.querySelector("#prevBtn");
 const nextBtn = document.querySelector("#nextBtn");
 const deleteBtn = document.querySelector("#deleteBtn");
+const shuffleBtn = document.querySelector("#shuffleBtn");
 
 const masterySegments = document.querySelectorAll("#masteryBar .mastery-segment");
 const knowBtn = document.querySelector("#knowBtn");
@@ -48,6 +49,25 @@ function saveFlashcards(cards) {
 // Loads flashcards on start
 let flashcards = loadFlashcards();
 
+// Fisher-Yates shuffle
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+ 
+    // Swap array[i] and array[j]
+    const temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+}
+ 
+function shuffleCards() {
+  shuffleArray(flashcards);
+  currentIndex = 0;         // start from the top of the new order
+  showingDefinition = false;
+  render();
+}
+
 // Fills in segments based on mastery
 function renderMasteryBar(mastery) {
   masterySegments.forEach(function (segment, index) {
@@ -72,6 +92,7 @@ function render() {
     prevBtn.disabled = true;
     nextBtn.disabled = true;
     deleteBtn.disabled = true;
+    shuffleBtn.disabled = true;
     knowBtn.disabled = true;
     dontKnowBtn.disabled = true;
     renderMasteryBar(0); // no card = no filled segments
@@ -95,6 +116,9 @@ function render() {
   // Disable "Previous" on the first card and "Next" on the last card
   prevBtn.disabled = currentIndex === 0;
   nextBtn.disabled = currentIndex === flashcards.length - 1;
+
+  // Need multiple cards to shuffle
+  shuffleBtn.disabled = flashcards.length <= 1;
 
   deleteBtn.disabled = false;
   knowBtn.disabled = false;
@@ -168,6 +192,7 @@ cardEl.addEventListener("click", flipCard);
 nextBtn.addEventListener("click", goNext);
 prevBtn.addEventListener("click", goPrev);
 deleteBtn.addEventListener("click", deleteCurrentCard);
+shuffleBtn.addEventListener("click", shuffleCards);
 knowBtn.addEventListener("click", markKnow);
 dontKnowBtn.addEventListener("click", markDontKnow);
 

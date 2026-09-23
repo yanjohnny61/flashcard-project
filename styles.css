@@ -158,6 +158,17 @@ button:disabled {
   cursor: not-allowed;
 }
 
+/* Circular icon-only button */
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+}
+
 .progress {
   font-size: 13px;
   color: var(--color-text-muted);
